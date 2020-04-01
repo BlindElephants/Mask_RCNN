@@ -20,6 +20,9 @@ from matplotlib import patches,  lines
 from matplotlib.patches import Polygon
 import IPython.display
 
+import skimage.io
+from skimage import img_as_uint, img_as_bool
+
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
 
@@ -78,6 +81,12 @@ def apply_mask(image, mask, color, alpha=0.5):
                                   (1 - alpha) + alpha * color[c] * 255,
                                   image[:, :, c])
     return image
+
+def save_masks(masks, file_name):
+    N = masks.shape[2]
+    for i in range(N):
+        out_name = "{}_mask_{}.png".format(file_name, i)
+        skimage.io.imsave(out_name, img_as_uint(masks[:,:,i]))
 
 
 def display_instances(image, boxes, masks, class_ids, class_names,
@@ -151,6 +160,16 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         if show_mask:
             masked_image = apply_mask(masked_image, mask, color)
 
+            plt.figure()
+            print(type(mask))
+
+            out_mask = masked_image * mask
+
+            plt.imshow(out_mask, cmap='binary_r')
+            plt.savefig("mask_{}.png".format(i))
+            plt.close()
+
+
         # Mask Polygon
         # Pad to ensure proper polygons for masks that touch image edges.
         padded_mask = np.zeros(
@@ -163,8 +182,9 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
-    if auto_show:
-        plt.show()
+
+    
+    plt.savefig("demotest.png")
 
 
 def display_differences(image,
